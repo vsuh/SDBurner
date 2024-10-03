@@ -5,3 +5,5 @@ db.sqlite
 .vscode 
 .venv  
 **/__pycache__/*
+sd/
+cspell.json  

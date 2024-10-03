@@ -56,7 +56,7 @@ class InitDB:
         with self.conn:
             self.conn.row_factory = sqlite3.Row
             cursor = self.conn.cursor()    
-            sql = f'INSERT INTO mp3files (fpath, hash, size) VALUES ( "{file.absolute()._str}", "{self.get_file_hash(file)}",  "{file.stat().st_size}")'
+            sql = f'INSERT INTO mp3files (fpath, hash, size) VALUES ( "{file.absolute()}", "{self.get_file_hash(file)}",  "{file.stat().st_size}")'
             # print(sql)
             cursor.execute(sql)
             self.conn.commit()
@@ -65,7 +65,7 @@ class InitDB:
         
         self.conn_db()
         if not self.mp3path.exists():
-            raise FileNotFoundError("mp3 каталог не найден")
+            raise FileNotFoundError(f"mp3 каталог '{self.mp3path}' не найден")
         filelist = self.mp3path.rglob('*')
         r=0
         with self.conn:

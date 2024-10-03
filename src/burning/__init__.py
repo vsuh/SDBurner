@@ -16,7 +16,8 @@ import os
 from pathlib import Path
 import logging 
 import sqlite3
-from shutil import copy
+from shutil import copy, rmtree
+from datetime import datetime as dt
 class BurnCD:
     """
     Заполнение коллекции треками
@@ -56,27 +57,21 @@ class BurnCD:
                 # print(f'Файл {self.file_name(row["fpath"])} размером {row["size"]}b. добавлен в коллекцию. Всего {self.humanize(total_size)} сравниваем с {self.humanize(self.cdsize)}')
             
             self.log.info(f'В список для коллекции {self.cdpath} помещено {len(rows)} файлов')    
-            # self.conn.close()
-            
+
+        SDpath = Path(self.cdpath)
         if self.force:
             self.log.debug(f'Из-за флага force нужно очистить Каталог коллекции "{Path(self.cdpath).absolute()}"')
-            SDpath = Path(self.cdpath)
-            if SDpath.exists() and SDpath.is_dir() and self.force:
-                for sd in SDpath.rglob('*'):
-                    sd.unlink()
-                SDpath.rmdir()
-                self.log.debug(f'Каталог коллекции {self.cdpath} очищен')
-            try:
-                SDpath.mkdir()
-            except FileExistsError:
-                print(f'Каталог {SDpath} существует')
-                return
-            # TODO: Изменять в записи по файлу поле 'used' на сегодняшнюю дату    
-            for mm in path_to_collection:
-                Pmm = Path(mm)
-                copy(mm, Path.joinpath(SDpath, Pmm.name))
-                self.log.debug(f'Файл {self.file_name(mm)} размером {self.humanize(Pmm.stat().st_size)} скопирован в каталог {self.cdpath}')
-                self.update_used_field(mm)
+            if SDpath.is_dir():
+                rmtree(SDpath)
+                self.log.debug(f'Каталог коллекции "{self.cdpath}" очищен')
+
+        SDpath.mkdir(exist_ok=True)
+        # TODO: Изменять в записи по файлу поле 'used' на сегодняшнюю дату    
+        for mm in path_to_collection:
+            Pmm = Path(mm)
+            copy(mm, Path.joinpath(SDpath, Pmm.name))
+            self.log.debug(f'Файл {self.file_name(mm)} размером {self.humanize(Pmm.stat().st_size)} скопирован в каталог {self.cdpath}')
+            self.update_used_field(mm)
             
     def conn_db(self):
         "Соединение с БД"
