@@ -7,7 +7,7 @@
 Скрипт использует файл настройки .env или переменные окружения и/или 
 аргументы командной строки для управления поведением.
 
-В зависимости от перреданной команды, скрипт заполняет базу данных или 
+В зависимости от переданной команды, скрипт заполняет базу данных или 
 формирует коллекцию треков заданного размера. 
 
 Примеры:
@@ -15,6 +15,8 @@
     python sdburn.py burn -d my_database.sqlite -m /path/to/music -s 700000000
 
 """
+# 03.10.2024 TODO: добавить ключ -r --randomize для добавления к именам треков случайного префикса
+# 20.10.2024 TODO: добавить ключ -n --normalize для выравнивания громкости всех треков в коллекции
 
 from os import getenv
 import time
@@ -25,7 +27,7 @@ from src.initdb import InitDB
 from src.burning import  BurnCD
 import logging
 
-VER='1.0.0.2'
+VER='1.0.1.0'
 
 load_dotenv()
 
@@ -42,6 +44,7 @@ parser.add_argument("-d", dest="db_file", help="Имя файла базы да�
 parser.add_argument("-c", dest="col_path", help="Каталог формируемой коллекции", default=COL_PATH, type=pathlib.Path)
 parser.add_argument("-m", dest="music_dir", help="Каталог с музыкой", default=MUSIC_DIR, type=pathlib.Path)
 parser.add_argument("-s", dest="cdsize", help="Требуемый размер коллекции (байт)", default=CDSIZE, type=int)
+parser.add_argument("-r", dest="randomize", help="Добавление случайных префиксов к имени файла (burn)", action='store_true')
 parser.add_argument("-f", dest="force", help="Перезаписывать каталоги и файлы", action='store_true')
 parser.add_argument("-v", dest="debug", help="Режим избыточного протоколирования", action='store_true')
 parser.add_argument("--version", action="version", help="Показать версию скрипта", version=f'{parser.prog} {VER}')
@@ -62,7 +65,7 @@ if __name__ == '__main__':
     if args.cmd=='init':
         InitDB(args.music_dir, args.db_file, args.force, log)
     elif args.cmd=='burn':
-        BurnCD(args.db_file, args.col_path, args.cdsize, args.force, log)
+        BurnCD(args.db_file, args.col_path, args.cdsize, args.randomize, args.force, log)
     
     tm = time.time() - begin_tm
     if args.debug:
