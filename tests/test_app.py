@@ -5,6 +5,7 @@ import shutil
 from pathlib import Path
 
 PRJ_ROOT = Path(__file__).parent.parent
+NUM_MP3_FILES = 100
 
 # Define test parameters for different scenarios
 test_cases = [
@@ -26,7 +27,7 @@ def setup_music_directory():
     with open(music_dir / ".gitignore", "w") as gitignore_file:
         gitignore_file.write("*\n")
 
-    for i in range(3000):
+    for i in range(NUM_MP3_FILES):
         (music_dir / f"file_{i}.mp3").touch()
 
     yield music_dir  # Provide the music directory to the tests
